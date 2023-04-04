@@ -10,14 +10,17 @@ from ntp_packet import (
     NTPTimestamp,
 )
 
-def fake_server(address):
+def get_time(diff):
+    return int(time.time() + diff)
+
+def fake_server(args):
 
     s = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind( (address, 123) )
+    s.bind( (args.listen, args.port) )
 
-    drift_start = int(time.time())
-    speed = 0.9996
+    drift_start = get_time(args.diff)
+    speed = 1 + args.error
 
     while True:
         packet, source = s.recvfrom(100)
@@ -36,7 +39,7 @@ def fake_server(address):
             print('Client time:', packet.transmit_timestamp)
         except:
             pass
-        time_since_start = int(time.time()) - drift_start
+        time_since_start = get_time(args.diff) - drift_start
         return_time = drift_start + time_since_start * speed
         return_time = int(return_time)
 
@@ -64,11 +67,14 @@ def parse_bind_addr(address):
 def parse_args():
     parser = argparse.ArgumentParser(description='Fake NTP server')
     parser.add_argument('--listen', type=parse_bind_addr, default='::')
+    parser.add_argument('--port', type=int, default=123, help="UDP port to run NTP server on, default will require root privileges.")
+    parser.add_argument('--diff', type=int, default=0, help="Have NTP time differ from system time by this amount of seconds.")
+    parser.add_argument('--error', type=float, default=0, help="Error of this NTP server that makes NTP client think that time runs faster or slower that it actually does. Use positive values for faster and negative values for slower. For example, 0.01, will make each second 1%% faster.")
     return parser.parse_args()
 
 def main():
     args = parse_args()
-    fake_server(args.listen)
+    fake_server(args)
 
 if __name__ == '__main__':
     main()
