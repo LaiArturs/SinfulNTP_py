@@ -7,8 +7,8 @@ class NTPShort(object):
     fraction = 0
 
     def __init__(self, seconds, fraction):
-        self.seconds = long(seconds)
-        self.fraction = long(fraction)
+        self.seconds = seconds
+        self.fraction = fraction
 
     @staticmethod
     def from_bytes(data):
@@ -19,9 +19,9 @@ class NTPShort(object):
 
     @staticmethod
     def from_float(value):
-        seconds = long(value)
-        fraction = long(round( (value - seconds) * 0x10000 ))
-        if fraction > 0xffffL:
+        seconds = value
+        fraction = round( (value - seconds) * 0x10000 )
+        if fraction > 0xffff:
             seconds += 1
             fraction = 0
         return NTPShort(seconds, fraction)
@@ -47,8 +47,8 @@ class NTPTimestamp(object):
     fraction = 0
 
     def __init__(self, seconds, fraction):
-        self.seconds = long(seconds)
-        self.fraction = long(fraction)
+        self.seconds = seconds
+        self.fraction = fraction
 
     @staticmethod
     def from_bytes(data):
@@ -59,12 +59,12 @@ class NTPTimestamp(object):
 
     @staticmethod
     def from_unix_timestamp(timestamp):
-        seconds = long(timestamp)
-        fraction = long(round( (timestamp - seconds) * 0x100000000L ))
-        if fraction > 0xffffffffL:
-            fraction = 0xffffffffL
-        seconds += 0x83aa7e80L
-        seconds = (seconds & 0xffffffffL)
+        seconds = timestamp
+        fraction = round( (timestamp - seconds) * 0x100000000 )
+        if fraction > 0xffffffff:
+            fraction = 0xffffffff
+        seconds += 0x83aa7e80
+        seconds = (seconds & 0xffffffff)
         return NTPTimestamp(seconds, fraction)
 
     def to_bytes(self):
@@ -78,8 +78,8 @@ class NTPTimestamp(object):
 
     def __str__(self):
         ts = self.to_unix_timestamp()
-        secs = long(ts)
-        frac = long(round( (ts - secs) * 1000000 ))
+        secs = ts
+        frac = round( (ts - secs) * 1000000 )
         if frac >= 1000000:
             secs += 1
             frac = 0
