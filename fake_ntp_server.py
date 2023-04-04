@@ -16,7 +16,7 @@ def fake_server(address):
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind( (address, 123) )
 
-    drift_start = time.time()
+    drift_start = int(time.time())
     speed = 0.9996
 
     while True:
@@ -36,8 +36,9 @@ def fake_server(address):
             print('Client time:', packet.transmit_timestamp)
         except:
             pass
-        time_since_start = time.time() - drift_start
+        time_since_start = int(time.time()) - drift_start
         return_time = drift_start + time_since_start * speed
+        return_time = int(return_time)
 
         response = NTPPacket()
         response.version = packet.version
